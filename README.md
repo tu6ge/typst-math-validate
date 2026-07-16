@@ -8,7 +8,7 @@ Useful when users mix LaTeX habits with Typst (for example writing `matrix` inst
 
 ```toml
 [dependencies]
-typst-math-validate = { path = "." } # or crates.io version when published
+typst-math-validate = { git = "https://github.com/tu6ge/typst-math-validate", branch = "master" } # or crates.io version when published
 ```
 
 ## Usage
