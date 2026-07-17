@@ -43,11 +43,6 @@ const IDENT_ALIASES: &[Alias] = &[
         note: "Typst uses `mat(delim: \"||\", ...)` for norms-style matrices",
     },
     Alias {
-        from: "lg",
-        to: "log",
-        note: "Typst uses `log` (or `log` with a base) instead of `lg`",
-    },
-    Alias {
         from: "iint",
         to: "integral.double",
         note: "Typst uses `integral.double` for ∬ instead of `iint`",

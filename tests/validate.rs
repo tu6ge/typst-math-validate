@@ -182,9 +182,40 @@ fn accepts_ln_and_log_calls() {
 }
 
 #[test]
-fn suggests_log_for_lg() {
-    assert!(codes("lg(x)").contains(&DiagnosticCode::LatexAlias));
-    assert!(has_replacement("lg(x)", "log"));
+fn accepts_predefined_ops_and_styles() {
+    for input in [
+        "lg(x)",
+        "liminf_(n->oo) a_n",
+        "limsup_(n->oo) a_n",
+        "sinc(x)",
+        "coth(x)",
+        "scripts(sum)_1^2",
+        "limits(A)_1^2",
+        "mid(|)",
+        "upright(A)",
+        "bold(A)",
+        "italic(A)",
+        "scr(L)",
+        "hat(x)",
+        "tilde(a)",
+        "grave(a)",
+    ] {
+        let report = validate(input);
+        assert!(
+            !report.has_warnings()
+                && !report.diagnostics.iter().any(|d| {
+                    matches!(
+                        d.code,
+                        DiagnosticCode::SemanticMultiLetterIdent
+                            | DiagnosticCode::NameDidYouMean
+                            | DiagnosticCode::NameUnknownFunction
+                            | DiagnosticCode::LatexAlias
+                    )
+                }),
+            "unexpected diagnostics for {input:?}: {:?}",
+            report.diagnostics
+        );
+    }
 }
 
 #[test]
