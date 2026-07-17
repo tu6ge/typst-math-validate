@@ -18,8 +18,10 @@ pub fn lint_semantic(
 }
 
 fn walk(node: LinkedNode<'_>, occupied: &[std::ops::Range<usize>], out: &mut Vec<Diagnostic>) {
-    if node.kind() == SyntaxKind::MathIdent {
-        maybe_hint_ident(&node, occupied, out);
+    match node.kind() {
+        SyntaxKind::MathIdent => maybe_hint_ident(&node, occupied, out),
+        SyntaxKind::Str => maybe_hint_string(&node, occupied, out),
+        _ => {}
     }
 
     let is_call = node.kind() == SyntaxKind::MathCall;
@@ -31,7 +33,6 @@ fn walk(node: LinkedNode<'_>, occupied: &[std::ops::Range<usize>], out: &mut Vec
                 SyntaxKind::MathIdent | SyntaxKind::MathFieldAccess
             );
             if is_callee {
-                // Still walk into field-access children? Callee is skipped entirely.
                 continue;
             }
         }
@@ -47,10 +48,18 @@ fn maybe_hint_ident(
     let name = node.leaf_text().as_str();
     let span = node.range();
 
+    if ranges_overlap(&span, occupied) {
+        return;
+    }
+
+    if is_infinity_alias(name) {
+        out.push(infinity_diagnostic(name, span));
+        return;
+    }
+
     if name.chars().count() <= 1
         || is_known_ident(name)
         || LATEX_IDENT_ALIASES.contains(&name)
-        || ranges_overlap(&span, occupied)
     {
         return;
     }
@@ -91,6 +100,49 @@ fn maybe_hint_ident(
             )),
         );
     }
+}
+
+fn maybe_hint_string(
+    node: &LinkedNode<'_>,
+    occupied: &[std::ops::Range<usize>],
+    out: &mut Vec<Diagnostic>,
+) {
+    let span = node.range();
+    if ranges_overlap(&span, occupied) {
+        return;
+    }
+
+    let raw = node.leaf_text().as_str();
+    let inner = strip_string_quotes(raw);
+    if is_infinity_alias(inner) {
+        out.push(infinity_diagnostic(raw, span));
+    }
+}
+
+/// Informal infinity shorthands (ASCII `oo`), common in handwritten / ASCII math.
+fn is_infinity_alias(name: &str) -> bool {
+    matches!(name, "oo" | "OO" | "Oo" | "oO")
+}
+
+fn infinity_diagnostic(shown: &str, span: std::ops::Range<usize>) -> Diagnostic {
+    Diagnostic::new(
+        Severity::Warning,
+        DiagnosticCode::SemanticInfinityAlias,
+        format!(
+            "`{shown}` looks like a shorthand for infinity; Typst uses `infty`"
+        ),
+        span,
+    )
+    .with_suggestion(Suggestion::new(
+        "use `infty` for ∞",
+        Some("infty".to_string()),
+    ))
+}
+
+fn strip_string_quotes(raw: &str) -> &str {
+    raw.strip_prefix('"')
+        .and_then(|s| s.strip_suffix('"'))
+        .unwrap_or(raw)
 }
 
 fn ranges_overlap(a: &std::ops::Range<usize>, occupied: &[std::ops::Range<usize>]) -> bool {

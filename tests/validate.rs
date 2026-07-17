@@ -164,6 +164,34 @@ fn syntax_error_on_incomplete_frac() {
 }
 
 #[test]
+fn suggests_infty_for_quoted_oo() {
+    let input = r#"sum_(n=1)^"oo" 1/n^2"#;
+    let report = validate(input);
+    assert!(
+        codes(input).contains(&DiagnosticCode::SemanticInfinityAlias),
+        "{:?}",
+        report.diagnostics
+    );
+    assert!(has_replacement(input, "infty"));
+    assert!(
+        report.diagnostics.iter().any(|d| {
+            d.message.contains("infinity") && d.suggestions.iter().any(|s| {
+                s.replacement.as_deref() == Some("infty")
+            })
+        }),
+        "{:?}",
+        report.diagnostics
+    );
+}
+
+#[test]
+fn suggests_infty_for_bare_oo() {
+    let input = "sum_(n=1)^oo 1/n^2";
+    assert!(codes(input).contains(&DiagnosticCode::SemanticInfinityAlias));
+    assert!(has_replacement(input, "infty"));
+}
+
+#[test]
 fn unknown_symbol_near_miss() {
     // `alph` is one edit from `alpha`.
     let report = validate("alph");

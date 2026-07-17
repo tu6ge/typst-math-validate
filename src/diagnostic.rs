@@ -29,6 +29,8 @@ pub enum DiagnosticCode {
     SemanticMultiLetterIdent,
     /// Multi-letter identifier that may be a misspelled symbol.
     SemanticUnknownSymbol,
+    /// Shorthand like `oo` / `"oo"` used to mean infinity.
+    SemanticInfinityAlias,
 }
 
 impl DiagnosticCode {
@@ -41,6 +43,7 @@ impl DiagnosticCode {
             Self::NameDidYouMean => "name.did_you_mean",
             Self::SemanticMultiLetterIdent => "semantic.multi_letter_ident",
             Self::SemanticUnknownSymbol => "semantic.unknown_symbol",
+            Self::SemanticInfinityAlias => "semantic.infinity_alias",
         }
     }
 }
