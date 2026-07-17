@@ -27,6 +27,10 @@ fn accepts_valid_math() {
         "frac(a^2, 2)",
         "vec(1, 2, delim: \"[\")",
         "pi r^2",
+        "sin(x)",
+        "cos(theta)",
+        "log(x)",
+        "lim_(x -> 0) f(x)",
         "$ x^2 $",
     ] {
         let report = validate(input);

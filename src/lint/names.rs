@@ -237,10 +237,12 @@ pub fn lint_names(root: &typst_syntax::SyntaxNode) -> Vec<Diagnostic> {
 }
 
 fn walk(node: LinkedNode<'_>, out: &mut Vec<Diagnostic>) {
+    // Typst allows both library functions (`mat`) and symbols/ops (`sin`, `lim`)
+    // in call position, e.g. `sin(x)`. Treat known symbols as valid callees.
     if node.kind() == SyntaxKind::MathCall
         && let Some((name, span)) = call_callee_ident(&node)
         && !LATEX_IDENT_ALIASES.contains(&name.as_str())
-        && !is_known_function(&name)
+        && !is_known_ident(&name)
     {
         if let Some(suggestion) = closest_function(&name, 2) {
             out.push(
