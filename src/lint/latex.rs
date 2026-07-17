@@ -42,6 +42,11 @@ const IDENT_ALIASES: &[Alias] = &[
         to: "mat",
         note: "Typst uses `mat(delim: \"||\", ...)` for norms-style matrices",
     },
+    Alias {
+        from: "lg",
+        to: "log",
+        note: "Typst uses `log` (or `log` with a base) instead of `lg`",
+    },
 ];
 
 /// Backslash commands: `\from` → Typst `to`.
@@ -140,6 +145,51 @@ const COMMAND_ALIASES: &[Alias] = &[
         from: "pi",
         to: "pi",
         note: "use `pi` without a backslash",
+    },
+    Alias {
+        from: "ln",
+        to: "ln",
+        note: "use `ln` without a backslash",
+    },
+    Alias {
+        from: "log",
+        to: "log",
+        note: "use `log` without a backslash",
+    },
+    Alias {
+        from: "sin",
+        to: "sin",
+        note: "use `sin` without a backslash",
+    },
+    Alias {
+        from: "cos",
+        to: "cos",
+        note: "use `cos` without a backslash",
+    },
+    Alias {
+        from: "tan",
+        to: "tan",
+        note: "use `tan` without a backslash",
+    },
+    Alias {
+        from: "cot",
+        to: "cot",
+        note: "use `cot` without a backslash",
+    },
+    Alias {
+        from: "sec",
+        to: "sec",
+        note: "use `sec` without a backslash",
+    },
+    Alias {
+        from: "csc",
+        to: "csc",
+        note: "use `csc` without a backslash",
+    },
+    Alias {
+        from: "exp",
+        to: "exp",
+        note: "use `exp` without a backslash",
     },
     Alias {
         from: "sigma",

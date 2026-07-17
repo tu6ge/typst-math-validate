@@ -47,6 +47,38 @@ pub const MATH_FUNCTIONS: &[&str] = &[
     "round",
     "ceil",
     "floor",
+    // Common operators / named functions (also valid as Typst math symbols).
+    "sin",
+    "cos",
+    "tan",
+    "cot",
+    "sec",
+    "csc",
+    "arcsin",
+    "arccos",
+    "arctan",
+    "sinh",
+    "cosh",
+    "tanh",
+    "log",
+    "ln",
+    "exp",
+    "lim",
+    "max",
+    "min",
+    "inf",
+    "sup",
+    "det",
+    "dim",
+    "ker",
+    "arg",
+    "deg",
+    "gcd",
+    "lcm",
+    "mod",
+    "sum",
+    "product",
+    "integral",
 ];
 
 /// Common math symbols / operators that are valid multi-letter idents.
@@ -168,19 +200,32 @@ pub const MATH_SYMBOLS: &[&str] = &[
 
 /// Names that are intentional LaTeX aliases and handled by the latex lint.
 pub const LATEX_IDENT_ALIASES: &[&str] = &[
-    "matrix", "pmatrix", "bmatrix", "vmatrix", "Vmatrix",
+    "matrix", "pmatrix", "bmatrix", "vmatrix", "Vmatrix", "lg",
 ];
 
 /// Whether `name` is a known math function.
 pub fn is_known_function(name: &str) -> bool {
-    MATH_FUNCTIONS.contains(&name)
+    MATH_FUNCTIONS.iter().any(|s| eq_ident(s, name))
 }
 
 /// Whether `name` is a known symbol or function (safe multi-letter ident).
 pub fn is_known_ident(name: &str) -> bool {
     is_known_function(name)
-        || MATH_SYMBOLS.contains(&name)
-        || LATEX_IDENT_ALIASES.contains(&name)
+        || MATH_SYMBOLS.iter().any(|s| eq_ident(s, name))
+        || LATEX_IDENT_ALIASES.iter().any(|s| eq_ident(s, name))
+}
+
+/// Case-insensitive match for ASCII operator names (`Ln` ≈ `ln`),
+/// exact match otherwise (so `RR` stays distinct from `rr`).
+fn eq_ident(known: &str, name: &str) -> bool {
+    if known == name {
+        return true;
+    }
+    // Only fold purely ASCII lowercase operator-style names.
+    known.is_ascii()
+        && name.is_ascii()
+        && known.bytes().all(|b| b.is_ascii_lowercase())
+        && known.eq_ignore_ascii_case(name)
 }
 
 /// Find the closest known function within `max_dist` edit distance.
@@ -241,7 +286,7 @@ fn walk(node: LinkedNode<'_>, out: &mut Vec<Diagnostic>) {
     // in call position, e.g. `sin(x)`. Treat known symbols as valid callees.
     if node.kind() == SyntaxKind::MathCall
         && let Some((name, span)) = call_callee_ident(&node)
-        && !LATEX_IDENT_ALIASES.contains(&name.as_str())
+        && !is_latex_ident_alias(&name)
         && !is_known_ident(&name)
     {
         if let Some(suggestion) = closest_function(&name, 2) {
@@ -272,6 +317,11 @@ fn walk(node: LinkedNode<'_>, out: &mut Vec<Diagnostic>) {
     for child in node.children() {
         walk(child, out);
     }
+}
+
+/// Whether `name` is handled by the LaTeX-alias lint instead.
+fn is_latex_ident_alias(name: &str) -> bool {
+    LATEX_IDENT_ALIASES.iter().any(|s| eq_ident(s, name))
 }
 
 /// Return the callee identifier text and span for a `MathCall` node.

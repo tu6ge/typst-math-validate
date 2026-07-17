@@ -29,6 +29,12 @@ fn accepts_valid_math() {
         "pi r^2",
         "sin(x)",
         "cos(theta)",
+        "tan(x)",
+        "cot(x)",
+        "sec(x)",
+        "csc(x)",
+        "ln(x)",
+        "Ln(x)",
         "log(x)",
         "lim_(x -> 0) f(x)",
         "$ x^2 $",
@@ -161,6 +167,24 @@ fn syntax_error_on_incomplete_frac() {
     let report = validate("a/");
     assert!(!report.is_ok());
     assert!(codes("a/").contains(&DiagnosticCode::SyntaxParse));
+}
+
+#[test]
+fn accepts_ln_and_log_calls() {
+    for input in ["ln(x)", "ln x", "log(2)", "exp(1)", "cot(x)", "sec(theta)"] {
+        let report = validate(input);
+        assert!(
+            report.is_clean() || !report.has_warnings(),
+            "unexpected diagnostics for {input:?}: {:?}",
+            report.diagnostics
+        );
+    }
+}
+
+#[test]
+fn suggests_log_for_lg() {
+    assert!(codes("lg(x)").contains(&DiagnosticCode::LatexAlias));
+    assert!(has_replacement("lg(x)", "log"));
 }
 
 #[test]
