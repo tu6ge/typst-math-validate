@@ -128,6 +128,8 @@ pub const MATH_SYMBOLS: &[&str] = &[
     "pm",
     "mp",
     "infty",
+    // Informal ASCII infinity shorthand; accepted as-is (do not suggest quoting).
+    "oo",
     "sum",
     "product",
     "integral",

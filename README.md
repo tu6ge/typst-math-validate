@@ -60,7 +60,6 @@ Spans are byte ranges in the **normalized** math text (after `$` stripping).
 | Unknown calls | `name.unknown_function` | `foobarbaz(...)` |
 | Multi-letter idents | `semantic.multi_letter_ident` | `area` → `"area"` |
 | Symbol typos | `semantic.unknown_symbol` | near-miss symbol names |
-| Infinity shorthand | `semantic.infinity_alias` | `"oo"` / `oo` → `infty` |
 
 Built on [`typst-syntax::parse_math`](https://docs.rs/typst-syntax/latest/typst_syntax/fn.parse_math.html) and the [Typst math reference](https://typst.app/docs/reference/math/).
 

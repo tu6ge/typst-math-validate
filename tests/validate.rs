@@ -188,20 +188,14 @@ fn suggests_log_for_lg() {
 }
 
 #[test]
-fn suggests_infty_for_quoted_oo() {
-    let input = r#"sum_(n=1)^"oo" 1/n^2"#;
+fn accepts_bare_oo_without_quoting() {
+    // `oo` is an accepted informal form; do not suggest turning it into `"oo"`.
+    let input = "sum_(n=1)^oo 1/n^2";
     let report = validate(input);
     assert!(
-        codes(input).contains(&DiagnosticCode::SemanticInfinityAlias),
-        "{:?}",
-        report.diagnostics
-    );
-    assert!(has_replacement(input, "infty"));
-    assert!(
-        report.diagnostics.iter().any(|d| {
-            d.message.contains("infinity") && d.suggestions.iter().any(|s| {
-                s.replacement.as_deref() == Some("infty")
-            })
+        !report.diagnostics.iter().any(|d| {
+            d.code == DiagnosticCode::SemanticMultiLetterIdent
+                || d.suggestions.iter().any(|s| s.replacement.as_deref() == Some("\"oo\""))
         }),
         "{:?}",
         report.diagnostics
@@ -209,10 +203,18 @@ fn suggests_infty_for_quoted_oo() {
 }
 
 #[test]
-fn suggests_infty_for_bare_oo() {
-    let input = "sum_(n=1)^oo 1/n^2";
-    assert!(codes(input).contains(&DiagnosticCode::SemanticInfinityAlias));
-    assert!(has_replacement(input, "infty"));
+fn accepts_quoted_oo_without_infty_nag() {
+    let input = r#"sum_(n=1)^"oo" 1/n^2"#;
+    let report = validate(input);
+    assert!(
+        !report.diagnostics.iter().any(|d| {
+            d.suggestions
+                .iter()
+                .any(|s| s.replacement.as_deref() == Some("infty"))
+        }),
+        "{:?}",
+        report.diagnostics
+    );
 }
 
 #[test]
