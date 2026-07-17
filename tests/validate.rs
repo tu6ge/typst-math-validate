@@ -188,6 +188,42 @@ fn suggests_log_for_lg() {
 }
 
 #[test]
+fn suggests_integral_double_for_iint() {
+    let input = "iint_D x y dif x dif y";
+    let report = validate(input);
+    assert!(
+        codes(input).contains(&DiagnosticCode::LatexAlias),
+        "{:?}",
+        report.diagnostics
+    );
+    assert!(has_replacement(input, "integral.double"));
+    assert!(
+        report.diagnostics.iter().any(|d| d.message.contains("iint")),
+        "{:?}",
+        report.diagnostics
+    );
+}
+
+#[test]
+fn accepts_integral_double_without_field_hint() {
+    let input = "integral.double_D x y dif x dif y";
+    let report = validate(input);
+    assert!(
+        !report.diagnostics.iter().any(|d| {
+            d.code == DiagnosticCode::SemanticMultiLetterIdent
+                && d.message.contains("`double`")
+        }),
+        "{:?}",
+        report.diagnostics
+    );
+}
+
+#[test]
+fn suggests_integral_triple_for_iiint() {
+    assert!(has_replacement("iiint_V f dif V", "integral.triple"));
+}
+
+#[test]
 fn accepts_bare_oo_without_quoting() {
     // `oo` is an accepted informal form; do not suggest turning it into `"oo"`.
     let input = "sum_(n=1)^oo 1/n^2";

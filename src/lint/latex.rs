@@ -47,6 +47,21 @@ const IDENT_ALIASES: &[Alias] = &[
         to: "log",
         note: "Typst uses `log` (or `log` with a base) instead of `lg`",
     },
+    Alias {
+        from: "iint",
+        to: "integral.double",
+        note: "Typst uses `integral.double` for ∬ instead of `iint`",
+    },
+    Alias {
+        from: "iiint",
+        to: "integral.triple",
+        note: "Typst uses `integral.triple` for ∭ instead of `iiint`",
+    },
+    Alias {
+        from: "oint",
+        to: "integral.cont",
+        note: "Typst uses `integral.cont` for ∮ instead of `oint`",
+    },
 ];
 
 /// Backslash commands: `\from` → Typst `to`.
@@ -192,6 +207,21 @@ const COMMAND_ALIASES: &[Alias] = &[
         note: "use `exp` without a backslash",
     },
     Alias {
+        from: "iint",
+        to: "integral.double",
+        note: "use `integral.double` instead of `\\iint`",
+    },
+    Alias {
+        from: "iiint",
+        to: "integral.triple",
+        note: "use `integral.triple` instead of `\\iiint`",
+    },
+    Alias {
+        from: "oint",
+        to: "integral.cont",
+        note: "use `integral.cont` instead of `\\oint`",
+    },
+    Alias {
         from: "sigma",
         to: "sigma",
         note: "use `sigma` without a backslash",
@@ -213,15 +243,11 @@ pub fn lint_latex(text: &str, root: &typst_syntax::SyntaxNode) -> Vec<Diagnostic
 }
 
 fn walk_idents(node: LinkedNode<'_>, out: &mut Vec<Diagnostic>) {
-    if node.kind() == SyntaxKind::MathCall {
-        for child in node.children() {
-            if child.kind() == SyntaxKind::MathIdent {
-                let name = child.leaf_text().as_str();
-                if let Some(alias) = IDENT_ALIASES.iter().find(|a| a.from == name) {
-                    out.push(alias_diagnostic(alias, child.range(), false));
-                }
-                break;
-            }
+    // Match both call style (`matrix(...)`) and attach style (`iint_D`).
+    if node.kind() == SyntaxKind::MathIdent {
+        let name = node.leaf_text().as_str();
+        if let Some(alias) = IDENT_ALIASES.iter().find(|a| a.from == name) {
+            out.push(alias_diagnostic(alias, node.range(), false));
         }
     }
 

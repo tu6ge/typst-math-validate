@@ -202,7 +202,8 @@ pub const MATH_SYMBOLS: &[&str] = &[
 
 /// Names that are intentional LaTeX aliases and handled by the latex lint.
 pub const LATEX_IDENT_ALIASES: &[&str] = &[
-    "matrix", "pmatrix", "bmatrix", "vmatrix", "Vmatrix", "lg",
+    "matrix", "pmatrix", "bmatrix", "vmatrix", "Vmatrix", "lg", "iint", "iiint",
+    "oint",
 ];
 
 /// Whether `name` is a known math function.

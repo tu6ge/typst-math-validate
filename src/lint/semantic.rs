@@ -46,10 +46,18 @@ fn maybe_hint_ident(
     let name = node.leaf_text().as_str();
     let span = node.range();
 
+    // Field modifiers like `double` in `integral.double` are not free idents.
+    if node
+        .parent()
+        .is_some_and(|p| p.kind() == SyntaxKind::MathFieldAccess)
+    {
+        return;
+    }
+
     if ranges_overlap(&span, occupied)
         || name.chars().count() <= 1
         || is_known_ident(name)
-        || LATEX_IDENT_ALIASES.iter().any(|a| *a == name)
+        || LATEX_IDENT_ALIASES.iter().any(|a| eq_latex_alias(a, name))
     {
         return;
     }
@@ -90,6 +98,10 @@ fn maybe_hint_ident(
             )),
         );
     }
+}
+
+fn eq_latex_alias(known: &str, name: &str) -> bool {
+    known == name || (known.is_ascii() && name.is_ascii() && known.eq_ignore_ascii_case(name))
 }
 
 fn ranges_overlap(a: &std::ops::Range<usize>, occupied: &[std::ops::Range<usize>]) -> bool {
