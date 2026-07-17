@@ -224,6 +224,26 @@ fn suggests_integral_triple_for_iiint() {
 }
 
 #[test]
+fn accepts_math_spacing_helpers() {
+    for input in ["a space b", "a thin b", "a med b", "a thick b", "a quad b", "a wide b"] {
+        let report = validate(input);
+        assert!(
+            !report.diagnostics.iter().any(|d| {
+                d.code == DiagnosticCode::SemanticMultiLetterIdent
+                    && (d.message.contains("`space`")
+                        || d.message.contains("`thin`")
+                        || d.message.contains("`med`")
+                        || d.message.contains("`thick`")
+                        || d.message.contains("`quad`")
+                        || d.message.contains("`wide`"))
+            }),
+            "unexpected spacing hint for {input:?}: {:?}",
+            report.diagnostics
+        );
+    }
+}
+
+#[test]
 fn accepts_bare_oo_without_quoting() {
     // `oo` is an accepted informal form; do not suggest turning it into `"oo"`.
     let input = "sum_(n=1)^oo 1/n^2";

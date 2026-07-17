@@ -79,6 +79,13 @@ pub const MATH_FUNCTIONS: &[&str] = &[
     "sum",
     "product",
     "integral",
+    // Spacing helpers available in math mode.
+    "space",
+    "thin",
+    "med",
+    "thick",
+    "quad",
+    "wide",
 ];
 
 /// Common math symbols / operators that are valid multi-letter idents.
@@ -198,6 +205,13 @@ pub const MATH_SYMBOLS: &[&str] = &[
     "star",
     "circ",
     "bullet",
+    // Spacing helpers available in math mode.
+    "space",
+    "thin",
+    "med",
+    "thick",
+    "quad",
+    "wide",
 ];
 
 /// Names that are intentional LaTeX aliases and handled by the latex lint.
