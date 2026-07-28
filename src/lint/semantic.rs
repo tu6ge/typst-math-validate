@@ -82,6 +82,33 @@ fn maybe_hint_ident(
 
     if !is_known_function(name) {
         let quoted = format!("\"{name}\"");
+        if is_concatenated_uppercase_names(name) {
+            let separated = name
+                .chars()
+                .map(|c| c.to_string())
+                .collect::<Vec<_>>()
+                .join(" ");
+            out.push(
+                Diagnostic::new(
+                    Severity::Warning,
+                    DiagnosticCode::SemanticMultiLetterIdent,
+                    format!(
+                        "consecutive capital letters `{name}` are treated as one variable; \
+                         write them separately if they are distinct names (e.g. points or factors)"
+                    ),
+                    span,
+                )
+                .with_suggestion(Suggestion::new(
+                    format!("use `{separated}` for separate names"),
+                    Some(separated),
+                ))
+                .with_suggestion(Suggestion::new(
+                    format!("use `{quoted}` for one literal label"),
+                    Some(quoted),
+                )),
+            );
+            return;
+        }
         out.push(
             Diagnostic::new(
                 Severity::Hint,
@@ -98,6 +125,11 @@ fn maybe_hint_ident(
             )),
         );
     }
+}
+
+/// Whether an identifier looks like adjacent single-letter point names.
+fn is_concatenated_uppercase_names(name: &str) -> bool {
+    name.chars().count() > 1 && name.chars().all(|c| c.is_ascii_uppercase())
 }
 
 fn eq_latex_alias(known: &str, name: &str) -> bool {

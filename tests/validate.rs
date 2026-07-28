@@ -148,6 +148,32 @@ fn multi_letter_ident_hint() {
 }
 
 #[test]
+fn guides_concatenated_uppercase_point_names() {
+    let input = "ABCD - A_1 B_1 C_1 D_1";
+    let report = validate(input);
+
+    assert!(codes(input).contains(&DiagnosticCode::SemanticMultiLetterIdent));
+    assert!(has_replacement(input, "A B C D"));
+    assert!(has_replacement(input, "\"ABCD\""));
+    assert!(
+        report.diagnostics.iter().any(|d| {
+            d.severity == Severity::Warning
+                && d.message.contains("ABCD")
+                && d.message.contains("one variable")
+                && d.span == (0..4)
+                && d.suggestions.iter().any(|s| s.replacement.as_deref() == Some("A B C D"))
+        }),
+        "{:?}",
+        report.diagnostics
+    );
+    assert!(
+        !report.diagnostics.iter().any(|d| d.message.contains("`A_1`")),
+        "{:?}",
+        report.diagnostics
+    );
+}
+
+#[test]
 fn syntax_error_on_incomplete_attach() {
     let report = validate("x^");
     assert!(!report.is_ok());
