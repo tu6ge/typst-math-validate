@@ -174,6 +174,23 @@ fn guides_concatenated_uppercase_point_names() {
 }
 
 #[test]
+fn suggests_perp_for_orth() {
+    let input = "OA orth OB";
+    let report = validate(input);
+
+    assert!(codes(input).contains(&DiagnosticCode::SemanticUnknownSymbol));
+    assert!(has_replacement(input, "perp"));
+    assert!(
+        report
+            .diagnostics
+            .iter()
+            .any(|d| d.message.contains("not a Typst math symbol") && d.span == (3..7)),
+        "{:?}",
+        report.diagnostics
+    );
+}
+
+#[test]
 fn syntax_error_on_incomplete_attach() {
     let report = validate("x^");
     assert!(!report.is_ok());

@@ -7,6 +7,13 @@ use crate::lint::names::{
     closest_symbol, is_known_function, is_known_ident, LATEX_IDENT_ALIASES,
 };
 
+/// Common informal names for Typst math symbols.
+const SYMBOL_ALIASES: &[(&str, &str, &str)] = &[(
+    "orth",
+    "perp",
+    "`orth` is not a Typst math symbol; use `perp` for perpendicular",
+)];
+
 /// Lint multi-letter idents, skipping spans already covered by higher-priority lints.
 pub fn lint_semantic(
     root: &typst_syntax::SyntaxNode,
@@ -59,6 +66,25 @@ fn maybe_hint_ident(
         || is_known_ident(name)
         || LATEX_IDENT_ALIASES.iter().any(|a| eq_latex_alias(a, name))
     {
+        return;
+    }
+
+    if let Some((_, replacement, message)) = SYMBOL_ALIASES
+        .iter()
+        .find(|(alias, _, _)| name.eq_ignore_ascii_case(alias))
+    {
+        out.push(
+            Diagnostic::new(
+                Severity::Warning,
+                DiagnosticCode::SemanticUnknownSymbol,
+                *message,
+                span,
+            )
+            .with_suggestion(Suggestion::new(
+                format!("use `{replacement}` for ⟂"),
+                Some((*replacement).to_string()),
+            )),
+        );
         return;
     }
 
